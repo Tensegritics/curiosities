@@ -17,6 +17,8 @@
       (reify :extends m/CustomPainter
         (paint [_ canvas size]
           (.translate canvas (/ (.-width size) 2) (/ (.-height size) 2))
+          ; Obviously it's for educational purpose, on modern hardware it's counter-productive to do
+          ; it like that! .drawPoints alone must be more complex than our circle computation
           (loop [x 110 y 0 e2 0]
             (when (<= y x)
               (.drawPoints canvas ui/PointMode.points
