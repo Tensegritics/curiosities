@@ -1,0 +1,30 @@
+(ns t10s.curiosities.issue1
+  (:require ["package:flutter/material.dart" :as m]
+            ["dart:ui" :as ui]
+            [cljd.flutter :as f]))
+
+(defn main []
+  (f/run
+    (m/MaterialApp
+      .title "Welcome to Flutter"
+      .theme (m/ThemeData .primarySwatch m.Colors/pink))
+    .home
+    (m/Scaffold
+      .appBar (m/AppBar
+                .title (m/Text "Drawing circles with only + and <<")))
+    .body
+    (m/CustomPaint .painter
+      (reify :extends m/CustomPainter
+        (paint [_ canvas size]
+          (.translate canvas (/ (.-width size) 2) (/ (.-height size) 2))
+          (loop [x 110 y 0 e2 0]
+            (when (<= y x)
+              (.drawPoints canvas ui/PointMode.points
+                [(m/Offset x y) (m/Offset (- x) y) (m/Offset (- x) (- y)) (m/Offset x (- y))
+                 (m/Offset y x) (m/Offset y (- x)) (m/Offset (- y) (- x)) (m/Offset (- y) x)]
+                (doto (m/Paint) (.-strokeWidth! 1)))
+              (if (pos? e2)
+                (recur (dec x) (inc y) (+ e2 (* 2 (- y x -1))))
+                (recur x (inc y) (+ e2 (* 2 y) 1))))))
+        (shouldRepaint [_ _] false)))
+    (m/Container)))
