@@ -3,6 +3,8 @@
             ["dart:ui" :as ui]
             [cljd.flutter :as f]))
 
+; code for https://buttondown.email/tensegritics-curiosities/archive/managing-flutter-versions-and-drawing-circles-the/
+
 (defn main []
   (f/run
     (m/MaterialApp
