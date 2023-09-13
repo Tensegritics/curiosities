@@ -3,6 +3,8 @@
             ["dart:ui" :as ui]
             [cljd.flutter :as f]))
 
+; code for https://buttondown.email/tensegritics-curiosities/archive/drawing-lines-the-old-way/
+
 (defn segment
   "Returns a segment as a collection of integer coordinates from [0 0] to [w h]."
  [w h]
