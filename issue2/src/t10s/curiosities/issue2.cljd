@@ -1,0 +1,59 @@
+(ns t10s.curiosities.issue2
+  (:require ["package:flutter/material.dart" :as m]
+            ["dart:ui" :as ui]
+            [cljd.flutter :as f]))
+
+(defn segment
+  "Returns a segment as a collection of integer coordinates from [0 0] to [w h]."
+ [w h]
+ {:pre [(pos? w) (<= 0 h w)]}
+ (->> (iterate (fn [[x y sf]]
+                (when (< x w)
+                  (let [sf (+ sf h)]
+                    (if (pos? sf)
+                      [(inc x) (inc y) (- sf w)]
+                      [(inc x) y sf]))))
+        [0 0 (- (quot w 2))])
+   (map pop)
+   (take-while some?)))
+
+(defn main []
+  (f/run
+    (m/MaterialApp
+      .title "Welcome to Flutter"
+      .theme (m/ThemeData .primarySwatch m.Colors/pink))
+    .home
+    (m/Scaffold
+      .appBar (m/AppBar
+                .title (m/Text "SDF vs Bresenham")))
+    .body
+    :watch [^ui/FragmentProgram? program (ui/FragmentProgram.fromAsset "shaders/sdf.frag")]
+    (m/CustomPaint .painter
+      (reify :extends m/CustomPainter
+        (paint [_ canvas size]
+          ; parallel
+          (when program
+            (let [{:flds [width height]} size]
+              (.drawRect canvas
+                (m/Rect.fromLTWH 0 0 width height)
+                (doto (m/Paint)
+                  (.-shader! (doto (.fragmentShader program)
+                               ; from
+                               (.setFloat 0 100)
+                               (.setFloat 1 200)
+                               ; to
+                               (.setFloat 2 400)
+                               (.setFloat 3 100)
+                               ; thickness
+                               (.setFloat 4 1)))))))
+
+          ; sequential
+          (.drawPoints canvas
+              ui/PointMode.points
+              (into []
+                (map (fn [[x y]] (m/Offset (+ 100 x) (- 300 y))))
+                (segment 300 100))
+              (doto (m/Paint) (.-strokeWidth! 1))))
+
+        (shouldRepaint [_ _] false)))
+    (m/Container)))
